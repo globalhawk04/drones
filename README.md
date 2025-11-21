@@ -21,7 +21,7 @@ This is not a chatbot. It is an **Agentic Framework** that acts as a Chief Engin
 ## 🧠 How It Works
 Unlike standard LLMs which hallucinate physical specifications, OpenForge uses a **Hardware-Aware architecture**. It grounds its creativity in reality by using Computer Vision to read datasheets, Python simulations to validate flight physics, and OpenSCAD to generate physical geometry.
 
-### The "Self-Healing" Loop
+### The Self-Healing Loop
 The core differentiator is the **Optimization Agent**. If the sourced parts fail the physics simulation (e.g., TWR < 1.5), the system doesn't error out. It *reasons* about the failure, swaps components (e.g., "Upgrade motors from 2207 to 2306"), and re-simulates until it passes.
 
 ```mermaid
