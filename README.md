@@ -10,8 +10,8 @@
 
 ---
 
-## 📜 The Manifesto
-Hardware engineering is gatekept by expensive consultants and proprietary supply chains. **OpenForge** is an attempt to democratize physical creation.
+## 📜 
+Hardware engineering is gatekept by expensive consultants and proprietary supply chains. This is an attempt to democratize physical creation.
 
 This is not a chatbot. It is an **Agentic Framework** that acts as a Chief Engineer, Sourcing Manager, and Physics Simulator in one. It takes a prompt, validates the physics, finds the real parts in stock, and generates the files to build it.
 
