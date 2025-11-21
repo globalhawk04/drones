@@ -1,5 +1,6 @@
+## Version Notes- 11-21-22 improving simulation.  cad designs seem off this may be due to muliple simulation runs confusing the final output.  
 
-# OpenForge
+# OpenForge-
 **A Hardware-Aware Agentic Framework for Autonomous Engineering.**
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
