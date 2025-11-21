@@ -1,4 +1,4 @@
-## Version Notes- 11-21-22 improving simulation.  cad designs seem off this may be due to muliple simulation runs confusing the final output.  
+## Version Notes- 11-21-22 improving simulation.  cad designs seem off this may be due to muliple simulation runs confusing the final output.  Instead of library.scad having a pre-defined pro_frame module, the AI would define constraints (Keep-Out Zones, Bolt Points, Max Stress), and you would use a Python library (like trimesh or cadquery) to mathematically generate the mesh connectivity between those points.
 
 # OpenForge-
 **A Hardware-Aware Agentic Framework for Autonomous Engineering.**
