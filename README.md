@@ -23,7 +23,7 @@ Unlike standard chatbots that hallucinate physical specifications, OpenForge use
 
 ---
 
-## 🧠 Architecture: The "Self-Healing" Loop
+## 🧠 Architecture: The Self-Healing Loop
 
 The core differentiator of OpenForge is the **Optimization Agent**. It does not just generate a list of parts; it validates them against a physics engine.
 
@@ -100,7 +100,7 @@ GOOGLE_API_KEY="your_gemini_key_here"
 ```
 
 ### 3. Run the Master Simulation
-To witness the full "Intake -> Design -> Optimize -> Build" lifecycle:
+To witness the full Intake -> Design -> Optimize -> Build lifecycle:
 
 ```bash
 python -m scripts.prof_grade_test
