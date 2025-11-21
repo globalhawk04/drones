@@ -1,7 +1,6 @@
 # FILE: app/services/fusion_service.py
 import asyncio
 from app.services.recon_service import Scraper
-# Vision import kept for reference architecture, but unused in Safe Mode
 from app.services.vision_service import analyze_image_for_specs
 from app.services.library_service import infer_motor_mounting, extract_prop_diameter
 from app.services.search_service import find_components
@@ -25,11 +24,12 @@ async def process_single_candidate(scraper, item, part_type):
 
     print(f"   Trying: {title[:40]}...")
     
-    # 1. Scrape (Uses Mock Scraper in Safe Mode)
+    # 1. Scrape
     scraped_data = await scraper.scrape_product_page(link)
     if not scraped_data: return None
 
     # --- PRICE LOGIC START ---
+    # Prefer scraped price, fallback to search price
     final_price = scraped_data.get('price')
     if not final_price or final_price == "Check Site":
         final_price = search_price
@@ -38,52 +38,30 @@ async def process_single_candidate(scraper, item, part_type):
     engineering_data = {}
     image_url = scraped_data.get('image_url')
     
-    # 2. Vision Analysis (BYPASSED FOR SAFE MODE / PUBLIC DEMO)
-    # In a live production environment, uncomment this block to enable Gemini Vision.
-    # For the public portfolio release, we rely on safe defaults to prevent abuse/errors.
-    """
+    # 2. Vision
     vision_cat = get_vision_category(part_type)
     if image_url and vision_cat:
         vision_result = await analyze_image_for_specs(image_url, vision_cat)
         if vision_result and not vision_result.get("error"):
             engineering_data = vision_result
             engineering_data["source"] = "vision"
-    """
 
-    # 3. Data Sanitization & Safe Mode Defaults
-    # We inject specific values to ensure the Demo generates a valid 5-inch drone.
-    
-    if part_type == "Motors":
-        # Default to standard 5-inch motor mount (16x16)
-        engineering_data["mounting_mm"] = 16.0
-        engineering_data["source"] = "safe_mode_default"
-        
-    elif part_type == "FC_Stack":
-        # Default to standard stack mount (30.5x30.5)
-        engineering_data["mounting_mm"] = 30.5
-        engineering_data["usb_orientation"] = "SIDE"
-        engineering_data["source"] = "safe_mode_default"
-        
-    elif part_type == "Propellers":
-        # Default to 5-inch prop (127mm)
-        engineering_data["diameter_mm"] = 127.0
-        engineering_data["source"] = "safe_mode_default"
-        
-    elif part_type == "Camera":
-        # Default to DJI O3 Width (20mm)
-        engineering_data["width_mm"] = 20.0
-        engineering_data["source"] = "safe_mode_default"
-
-    # Fallback: Text Inference (if not covered by Safe Mode defaults)
-    if not engineering_data.get("mounting_mm") and part_type == "Motors":
+    # 3. Sanitize
+    if part_type == "Motors" and not engineering_data.get("mounting_mm"):
         inferred = infer_motor_mounting(title)
         if inferred:
             engineering_data["mounting_mm"] = inferred
             engineering_data["source"] = "text_inference"
 
+    if part_type == "Propellers" and not engineering_data.get("diameter_mm"):
+        diam = extract_prop_diameter(title)
+        if diam:
+            engineering_data["diameter_mm"] = diam
+            engineering_data["source"] = "text_inference"
+
     return {
         "product_name": title,
-        "price": final_price,
+        "price": final_price, # Uses the improved price
         "source_url": link,
         "image_url": image_url,
         "engineering_data": engineering_data,
@@ -102,16 +80,27 @@ async def fuse_component_data(part_type: str, search_query: str):
     valid_candidates = [c for c in candidates if c is not None]
     if not valid_candidates: return None
 
-    # In Safe Mode, since we force the specs, we just pick the first result
-    # that mimics a "Best Engineering" match.
-    best_spec_candidate = valid_candidates[0]
+    best_spec_candidate = None
+    for c in valid_candidates:
+        specs = c['engineering_data']
+        if specs.get('source') == "vision":
+            best_spec_candidate = c
+            break
+        if specs.get('source') == "text_inference":
+            best_spec_candidate = c
+    
+    if not best_spec_candidate:
+        best_spec_candidate = valid_candidates[0]
+
+    # Use price/link from first result (relevance), but if the first result 
+    # has no price, try to find a candidate that DOES have a price.
     primary_link = valid_candidates[0]
     
-    # Price Optimization
+    # Price Optimization: Find a candidate with a real price if primary is missing it
     if not primary_link['price'] or primary_link['price'] == "Check Site":
         for c in valid_candidates:
             if c['price'] and c['price'] != "Check Site":
-                primary_link = c 
+                primary_link = c # Swap primary if we found a better price source
                 break
 
     composite_part = {

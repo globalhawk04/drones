@@ -22,7 +22,7 @@ from app.services.ai_service import (
     refine_requirements, 
     generate_spec_sheet, 
     generate_assembly_instructions,
-    optimize_specs # <--- NEW
+    optimize_specs
 )
 from app.services.fusion_service import fuse_component_data
 from app.services.physics_service import run_physics_simulation
@@ -42,7 +42,7 @@ def image_to_b64(path):
 
 async def main():
     print("\n==================================================")
-    print("🚁 DRONE ARCHITECT: REVISION SYSTEM TEST")
+    print("🚁 DRONE ARCHITECT: MASTER SYSTEM TEST")
     print("==================================================\n")
 
     project_id = "master_rev_test"
@@ -50,11 +50,22 @@ async def main():
         "project_id": project_id,
         "created_at": datetime.utcnow().isoformat(),
         "status": "initializing",
-        "revisions": [] # <--- NEW: Version History
+        "user_intent": {},
+        "engineering": {},
+        "revisions": [],
+        "sourcing": {},    # Final State
+        "simulation": {},  # Final State
+        "fabrication": {}, # Final State
+        "assembly": {},    # Final State
+        "procurement": {}  # Final State
     }
 
     # --- PHASE 1: INTAKE ---
-    user_prompt = "I want to build a rugged 5 inch freestyle drone with a camera for digital video"
+    print("--- [PHASE 1] INTAKE & REQUIREMENTS ---")
+    
+    user_prompt = "I want to build a handheld freestyle drone with a camera for digital video"
+    print(f"🗣️  User: '{user_prompt}'")
+    
     answers = [
         "Question: Budget? | Answer: $400",
         "Question: Analog or Digital? | Answer: DJI O3 (Digital)",
@@ -71,25 +82,33 @@ async def main():
 
     print(f"✅ Plan Approved: {final_plan.get('build_summary')}")
     
+    # --- DATA CAPTURE: INTENT & ENGINEERING ---
+    master_record["user_intent"] = {
+        "original_prompt": user_prompt,
+        "interview_answers": answers
+    }
+    master_record["engineering"] = {
+        "initial_analysis": analysis,
+        "final_plan": final_plan,
+        "spec_sheet": spec_sheet
+    }
+
     # Initial "To-Source" List
     current_shopping_list = spec_sheet.get("buy_list", [])
-    
-    # We maintain the 'current_bom' across loops
     current_bom = [] 
     
     # --- LOOP: SOURCING -> PHYSICS -> OPTIMIZATION ---
     MAX_REVISIONS = 3
     revision_count = 0
     
+    # We need to track CAD specs across revisions
+    cad_specs = {} 
+
     while revision_count < MAX_REVISIONS:
         revision_count += 1
         print(f"\n--- 🔄 REVISION {revision_count} START ---")
 
         # 1. Sourcing (Delta Update)
-        # If current_bom is empty, source everything.
-        # If current_bom exists, we only source items in 'current_shopping_list' 
-        # and replace them in the BOM.
-        
         for target_item in current_shopping_list:
             part_type = target_item['part_type']
             query = target_item.get('new_search_query') or target_item.get('search_query')
@@ -98,10 +117,16 @@ async def main():
             new_part_data = await fuse_component_data(part_type, query)
             
             if new_part_data:
-                # Remove old part if exists
+                # Remove old part if exists (Replacement Logic)
                 current_bom = [p for p in current_bom if p['part_type'] != part_type]
-                # Add new part
                 current_bom.append(new_part_data)
+                
+                # Update CAD Specs from new part
+                specs = new_part_data.get('engineering_specs', {})
+                if specs.get('mounting_mm'): cad_specs['motor_mounting_mm'] = specs['mounting_mm']
+                if specs.get('diameter_mm'): cad_specs['prop_diameter_mm'] = specs['diameter_mm']
+                if specs.get('width_mm'): cad_specs['camera_width_mm'] = specs['width_mm']
+                if part_type == "FC_Stack" and not cad_specs.get('fc_mounting_mm'): cad_specs['fc_mounting_mm'] = 30.5
             else:
                 print(f"   ⚠️ Failed to source {part_type}")
 
@@ -131,7 +156,7 @@ async def main():
             print("⛔ Max revisions reached. Proceeding with best effort.")
             break
 
-        # 4. AI Optimization (The Agent)
+        # 4. AI Optimization
         print("❌ System Underpowered. Calling Optimization Agent...")
         optimization_plan = await optimize_specs(current_bom, physics_report)
         
@@ -142,65 +167,52 @@ async def main():
         print(f"🧠 Diagnosis: {optimization_plan.get('diagnosis')}")
         print(f"🔧 Strategy: {optimization_plan.get('strategy')}")
         
-        # Update the shopping list for the next loop
-        # We only want to search for the parts the AI told us to replace
         current_shopping_list = optimization_plan.get("replacements", [])
-        
         if not current_shopping_list:
             print("⚠️ Agent suggested no changes. Stopping.")
             break
-            
-        print(f"📋 New Shopping List: {[item['part_type'] for item in current_shopping_list]}")
 
+    # --- DATA CAPTURE: FINAL SOURCING & SIMULATION ---
+    master_record["sourcing"] = {
+        "bill_of_materials": current_bom,
+        "extracted_cad_params": cad_specs
+    }
+    master_record["simulation"] = physics_report
 
-    # --- POST-LOOP: GENERATION (CAD, Docs, Viz) ---
-    # Using the final state of current_bom
-    
-    print("\n--- [FINAL PHASE] GENERATING ASSETS ---")
-    
-    # Extract CAD Specs from final BOM
-    cad_specs = {}
-    for p in current_bom:
-        specs = p.get('engineering_specs', {})
-        if specs.get('mounting_mm'): cad_specs['motor_mounting_mm'] = specs['mounting_mm']
-        if specs.get('diameter_mm'): cad_specs['prop_diameter_mm'] = specs['diameter_mm']
-        if specs.get('width_mm'): cad_specs['camera_width_mm'] = specs['width_mm']
-        if p['part_type'] == "FC_Stack" and not cad_specs.get('fc_mounting_mm'): cad_specs['fc_mounting_mm'] = 30.5
-    
-    # Fastening logic
-    fastening = final_plan.get('final_constraints', {}).get('fastening_method', '')
+    # --- PHASE 4: CAD ---
+    print("\n--- [PHASE 4] GENERATIVE CAD ---")
+    constraints = final_plan.get('final_constraints', {})
+    fastening = constraints.get('fastening_method', '')
     cad_specs['use_inserts'] = True if 'Insert' in fastening or 'insert' in fastening else False
-
-    # Run Generators
-    assets = generate_assets(project_id, cad_specs)
     
-    guide_context = {
-        "bill_of_materials": [{"part_type": p['part_type'], "product_name": p['product_name']} for p in current_bom],
+    assets = generate_assets(project_id, cad_specs)
+    master_record["fabrication"] = assets
+
+    # --- PHASE 5: ASSEMBLY & DOCS ---
+    print("\n--- [PHASE 5] INSTRUCTION GENERATION ---")
+    project_context = {
+        "bill_of_materials": [{"part_type": p.get('part_type'), "product_name": p.get('product_name')} for p in current_bom if p.get('product_name')],
         "engineering_notes": spec_sheet.get("engineering_notes"),
         "fabrication_specs": cad_specs
     }
-    guide = await generate_assembly_instructions(guide_context)
+    guide = await generate_assembly_instructions(project_context)
     steps = guide.get("steps", [])
-    
+    master_record["assembly"] = guide
+
     schematic_path = generate_wiring_diagram(project_id, [p.get('product_name', '') for p in current_bom])
+    if schematic_path: master_record["assembly"]["schematic_diagram"] = schematic_path
+    
     cost_report = generate_procurement_manifest(current_bom)
+    master_record["procurement"] = cost_report
 
-    # Final Master Record Update
-    master_record["final_build"] = {
-        "bom": current_bom,
-        "cad_assets": assets,
-        "assembly_guide": guide,
-        "schematic": schematic_path,
-        "procurement": cost_report
-    }
+    # --- PHASE 6: SAVE FINAL SOURCE OF TRUTH ---
+    print("\n--- [PHASE 6] SAVING DATA ---")
     master_record["status"] = "complete"
-
-    # Save JSON
     json_path = os.path.join(OUTPUT_DIR, f"{project_id}_manifest.json")
     with open(json_path, "w") as f: json.dump(master_record, f, indent=2)
-    print(f"💾 Master Record saved: {json_path}")
+    print(f"💾 Source of Truth saved: {json_path}")
 
-    # Visualize
+    # --- PHASE 7: VISUALIZATION ---
     template_path = os.path.join(PROJECT_ROOT, "templates", "animate.html")
     output_path = os.path.join(OUTPUT_DIR, "master_build_guide.html")
     
