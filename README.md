@@ -74,7 +74,7 @@ graph TD
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/yourusername/OpenForge.git
+git clone https://github.com/yourusername/reponame.git
 cd OpenForge
 ```
 
