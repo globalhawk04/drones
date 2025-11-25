@@ -6,7 +6,7 @@
 ![CAD](https://img.shields.io/badge/CAD-OpenSCAD-green)
 ![License](https://img.shields.io/badge/License-AGPL_v3-blue.svg)
 
-**OpenForge** is an AI-powered "Hardware Compiler." It transforms natural language requests into fully engineered, flight-ready drone designs.
+**OpenForge** is an AI-powered Hardware Compiler. It transforms natural language requests into fully engineered, flight-ready drone designs.
 
 Unlike standard chatbots that hallucinate hardware, OpenForge uses a **Cyber-Physical Agentic Loop**: it interviews the user, browses the real internet for parts, reads technical diagrams using Computer Vision, simulates flight physics, generates manufacturing files (CAD), and renders a 3D Digital Twin.
 
