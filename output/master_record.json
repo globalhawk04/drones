@@ -1,0 +1,86 @@
+{
+  "plan": {
+    "final_constraints": {
+      "budget_usd": "Unspecified",
+      "frame_size": "Large (Heavy Lift)",
+      "video_system": "Digital",
+      "battery_cell_count": "12S",
+      "build_standard": "Professional",
+      "fastening_method": "Threaded fasteners with locking mechanisms",
+      "wiring_standard": "Industry standard with redundant power feeds"
+    },
+    "build_summary": "This document outlines the engineering specifications for a long-range camera drone designed for extended flight times. The drone will adhere to a 'Heavy Lift' class, with a large carbon fiber frame to accommodate the necessary components and payload. A 12S battery configuration is chosen to maximize efficiency for the one-hour flight time requirement. A digital video system is selected to ensure reliable video transmission over the required 1km range. The drone will carry an infrared and RGB camera system. No GPS module is required and the preferred flight controller will be hand held. Professional build standards will be followed, utilizing threaded fasteners with locking mechanisms and an industry-standard wiring configuration with redundant power feeds.",
+    "approval_status": "ready_for_approval",
+    "topology": {
+      "class": "Heavy Lift",
+      "target_voltage": "12S",
+      "prop_size_inch": 36.0,
+      "video_system": "Digital",
+      "frame_material": "Carbon Fiber"
+    }
+  },
+  "bom": [
+    {
+      "part_type": "Motors",
+      "product_name": "T-Motor Official Store | Drone Motors, ESCs & Propellers for UAVs",
+      "price": 97.9,
+      "source_url": "https://store.tmotor.com/",
+      "engineering_specs": {},
+      "reference_image": null,
+      "data_source_method": "raw_search",
+      "alternatives_checked": 3
+    },
+    {
+      "part_type": "Frame_Kit",
+      "product_name": "JeeFly LX550/LX680 Carbon Fiber Drone Frame 4 ... - Amazon.com",
+      "price": 10.0,
+      "source_url": "https://www.amazon.com/Non-foldable-Quadcopter-Landing-Photography-Mapping/dp/B0FFYSC641",
+      "engineering_specs": {},
+      "reference_image": "https://m.media-amazon.com/images/I/61MUmX2b7+L._AC_SX425_.jpg",
+      "data_source_method": "raw_search",
+      "alternatives_checked": 3
+    },
+    {
+      "part_type": "FC_Stack",
+      "product_name": "Yawman Arrow Handheld Controller \u2013 Yawman | Patented ...",
+      "price": 199.0,
+      "source_url": "https://yawmanflight.com/products/yawman-arrow-handheld-controller",
+      "engineering_specs": {},
+      "reference_image": null,
+      "data_source_method": "raw_search",
+      "alternatives_checked": 3
+    },
+    {
+      "part_type": "Camera_VTX_Kit",
+      "product_name": "Shop High-Performance Digital VTX for Drones at Pyrodrone",
+      "price": "Check Site",
+      "source_url": "https://pyrodrone.com/collections/digital-vtx",
+      "engineering_specs": {
+        "width_mm": null,
+        "source": "vision"
+      },
+      "reference_image": "https://pyrodrone.com/cdn/shop/files/4fe549_39ff0979a4094b54942026c494ce9d79_mv2_512x512.jpg?v=1760050542",
+      "data_source_method": "vision",
+      "alternatives_checked": 1
+    },
+    {
+      "part_type": "Battery",
+      "product_name": "44.4v 12s Lipo Battery Packs",
+      "price": 99.0,
+      "source_url": "https://genstattu.com/12s-44-4v-lipo-battery.html",
+      "engineering_specs": {},
+      "reference_image": "https://cdn11.bigcommerce.com/s-99ohneivnb/images/stencil/500x500/products/3553/12927/_2__12598.1753693867.jpg?c=1",
+      "data_source_method": "raw_search",
+      "alternatives_checked": 3
+    }
+  ],
+  "physics": {
+    "total_weight_g": 363,
+    "twr": 5.09,
+    "hover_throttle_percent": 19.6,
+    "est_flight_time_min": 4.7,
+    "disk_loading": 71.64,
+    "top_speed_kmh": 45,
+    "status": "FLYABLE"
+  }
+}
