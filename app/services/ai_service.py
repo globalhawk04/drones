@@ -22,7 +22,7 @@ def parse_json_garbage(text: str) -> dict | None:
 
 async def call_llm_for_json(prompt: str, system_instruction: str) -> dict | None:
     try:
-        model = genai.GenerativeModel('gemini-2.0-flash', system_instruction=system_instruction)
+        model = genai.GenerativeModel('gemini-2.5-pro', system_instruction=system_instruction)
         response = await model.generate_content_async(prompt, generation_config={"response_mime_type": "application/json"})
         return parse_json_garbage(response.text)
     except Exception as e:
@@ -49,11 +49,158 @@ async def generate_spec_sheet(build_plan: dict) -> dict:
     print(f"--> 📋 Sourcing Agent working on: {topology.get('class')} ({topology.get('target_voltage')})...")
     return await call_llm_for_json(json.dumps(build_plan), SPEC_GENERATOR_INSTRUCTION)
 
-async def generate_assembly_instructions(project_data: dict) -> dict:
-    print("--> 📝 Generating Documentation...")
-    return await call_llm_for_json(json.dumps(project_data), ASSEMBLY_GUIDE_INSTRUCTION)
+async def generate_assembly_instructions(blueprint: dict) -> dict:
+    """
+    Transforms a validated assembly blueprint into a user-friendly guide.
 
-async def optimize_specs(current_bom: list, physics_report: dict) -> dict:
-    print("--> 🔧 Optimization Agent Analyzing...")
-    context = {"bom": current_bom, "report": physics_report}
-    return await call_llm_for_json(json.dumps(context), OPTIMIZATION_ENGINEER_INSTRUCTION)
+    This function no longer uses an LLM to generate steps. It directly
+    translates the machine-readable blueprint, which has already been
+    validated by the main loop, into a human-readable format. This ensures
+    the final instructions are 100% consistent with the generated CAD model.
+
+    Args:
+        blueprint: The final, validated assembly blueprint dictionary.
+
+    Returns:
+        A dictionary containing the guide in Markdown and a simple list of steps.
+    """
+    print("--> 📝 Finalizing documentation from validated blueprint...")
+
+    # The blueprint is the source of truth, so we just need to reformat it.
+    steps_list = []
+    markdown_lines = ["# Assembly Instructions\n"]
+
+    for step in blueprint.get("blueprint_steps", []):
+        # Format for the JSON object used by the dashboard's JavaScript
+        steps_list.append({
+            "step": step.get("title", "Unnamed Step"),
+            "detail": step.get("details", "No details provided.")
+        })
+        
+        # Format for a human-readable Markdown document (optional, but good practice)
+        markdown_lines.append(f"### Step {step.get('step_number')}: {step.get('title')}")
+        markdown_lines.append(f"{step.get('details')}\n")
+        if step.get('fasteners_used'):
+            markdown_lines.append(f"**Hardware:** {step.get('fasteners_used')}\n")
+
+    # Add the required fasteners list to the markdown guide
+    markdown_lines.append("---")
+    markdown_lines.append("\n## Required Hardware\n")
+    for fastener in blueprint.get("required_fasteners", []):
+        markdown_lines.append(f"- **{fastener.get('item')}** (x{fastener.get('quantity')}) - _{fastener.get('usage')}_")
+
+    final_guide = {
+        "guide_md": "\n".join(markdown_lines),
+        "steps": steps_list
+    }
+
+    return final_guide
+
+
+async def optimize_specs(current_bom: list, failure_report: dict) -> dict | None:
+    """
+    Analyzes a design failure and asks the AI to suggest a component replacement.
+
+    This function takes a structured failure report (either 'conceptual' or 'geometric')
+    and calls the Optimization Engineer AI to get a machine-readable fix.
+
+    Args:
+        current_bom: The Bill of Materials for the failed design.
+        failure_report: A dictionary containing the 'type' and 'details' of the failure.
+
+    Returns:
+        A dictionary with the AI's suggested fix, or None if the process fails.
+    """
+    print("--> 🔧 Optimization Engineer is analyzing the design failure...")
+
+    # 1. Prepare the context for the AI prompt.
+    #    This bundles the current component list and the failure report together.
+    context = {
+        "current_bom": current_bom,
+        "failure_report": failure_report
+    }
+    prompt_content = json.dumps(context, indent=2)
+
+    # 2. Call the LLM with the new, more sophisticated prompt.
+    suggested_fix = await call_llm_for_json(prompt_content, OPTIMIZATION_ENGINEER_INSTRUCTION)
+
+    # 3. Robust fallback: If the AI fails to provide a valid fix, return None.
+    #    The main loop will need to handle this as a critical, unrecoverable error.
+    if not suggested_fix or not suggested_fix.get("replacements"):
+        print("   ❌ AI Optimization Engineer failed to provide a valid solution.")
+        return None
+
+    # 4. Log the AI's thinking process for debugging and transparency.
+    print(f"   -> AI Diagnosis: {suggested_fix.get('diagnosis')}")
+    print(f"   -> AI Strategy: {suggested_fix.get('strategy')}")
+
+    return suggested_fix
+
+async def generate_assembly_blueprint(bom: list) -> dict:
+    """
+    Analyzes the BOM for compatibility and generates a machine-readable assembly plan.
+
+    This is the core of the conceptual validation loop. It uses a multimodal AI
+    to reason about the physical fitment of parts based on their specs and images.
+
+    Args:
+        bom: The complete Bill of Materials list of dictionaries.
+
+    Returns:
+        A dictionary conforming to the Assembly Blueprint schema.
+    """
+    print("--> 🧠 Master Builder is analyzing component compatibility...")
+
+    # 1. Prepare a simplified, clean version of the BOM for the AI prompt.
+    #    We only include the data relevant to the AI's analysis task.
+    context_bom = []
+    for item in bom:
+        context_bom.append({
+            "part_type": item.get("part_type"),
+            "product_name": item.get("product_name"),
+            "engineering_specs": item.get("engineering_specs", {}),
+            "reference_image_url": item.get("reference_image")
+        })
+
+    # 2. Format the BOM into a JSON string to serve as the main prompt content.
+    prompt_content = json.dumps({"bill_of_materials": context_bom}, indent=2)
+
+    # 3. Call the LLM using our helper function and the new, powerful prompt.
+    #    The helper handles the API call, error catching, and JSON parsing.
+    blueprint = await call_llm_for_json(prompt_content, ASSEMBLY_BLUEPRINT_INSTRUCTION)
+
+    # 4. Implement a robust fallback. If the AI fails or returns invalid data,
+    #    we must return a clear "failure" blueprint to prevent the main loop from crashing.
+    if not blueprint:
+        print("   ❌ AI service failed to generate a valid blueprint.")
+        return {
+            "is_buildable": False,
+            "incompatibility_reason": "The AI analysis service failed to return a valid response. This could be due to an API error or invalid output formatting.",
+            "required_fasteners": [],
+            "blueprint_steps": []
+        }
+
+    # 5. If the AI itself determines the build is not buildable, log it.
+    if not blueprint.get("is_buildable"):
+        reason = blueprint.get("incompatibility_reason", "No reason provided.")
+        print(f"   ❌ Conceptual Build Failed: {reason}")
+    else:
+        print("   ✅ Blueprint Generated. Build is conceptually viable.")
+
+    return blueprint
+
+async def ask_for_human_input(plan: dict, failed_item: dict) -> dict:
+    """
+    When the system is stuck, this function asks the AI to formulate a question for the user.
+    """
+    print("--> 🤖 AI is stuck, formulating a question for the user...")
+    context = {
+        "project_summary": plan.get("build_summary"),
+        "failed_sourcing_details": failed_item
+    }
+    prompt_content = json.dumps(context, indent=2)
+    
+    # Use a different model if you want, but the main one should be fine
+    interaction_data = await call_llm_for_json(prompt_content, HUMAN_INTERACTION_PROMPT)
+    
+    return interaction_data

@@ -61,6 +61,20 @@ async def run():
     print("\n🚀 OPENFORGE SYSTEM ONLINE")
     print("==========================")
     
+    # --- INIT MASTER RECORD ---
+    master_record = {
+        "meta": {
+            "timestamp": datetime.now().isoformat(),
+            "version": "1.0.0"
+        },
+        "requirements": {},
+        "engineering": {},
+        "sourcing": {},
+        "simulation": {},
+        "fabrication": {},
+        "documentation": {}
+    }
+    
     if not check_openscad(): print("⚠️  OpenSCAD not found. Using placeholders.")
     
     # 1. Intake
@@ -69,6 +83,9 @@ async def run():
     
     analysis = await analyze_user_requirements(prompt)
     if not analysis: return
+    
+    master_record["requirements"]["original_prompt"] = prompt
+    master_record["requirements"]["initial_analysis"] = analysis
 
     # 2. Clarification
     qs = analysis.get("missing_critical_info", []) or analysis.get("clarifying_questions", [])
@@ -76,14 +93,20 @@ async def run():
     if qs:
         print(f"\n🎤 Clarification needed ({len(qs)} questions):")
         for q in qs:
-            answers.append(f"Q: {q} | A: {input(f'   {q} > ')}")
+            ans = input(f"   {q} > ")
+            answers.append(f"Q: {q} | A: {ans}")
+            
+    master_record["requirements"]["user_answers"] = answers
 
     # 3. Planning
     plan = await refine_requirements(analysis, answers)
     print(f"\n✅ Plan Approved: {plan.get('build_summary')}")
+    master_record["engineering"]["final_plan"] = plan
 
     # 4. Execution
     specs = await generate_spec_sheet(plan)
+    master_record["engineering"]["spec_sheet"] = specs
+    
     bom = []
     cad_data = {}
     
@@ -100,14 +123,22 @@ async def run():
         else:
             print(f"     ⚠️  Failed to source {item['part_type']}")
             bom.append(item) # Keep placeholder
+            
+    master_record["sourcing"]["bill_of_materials"] = bom
 
     # 5. Physics & CAD
     print("\n🧪 Simulating Physics & Geometry...")
     phys = run_physics_simulation(bom)
     flight_log = generate_flight_log(phys)
     
+    master_record["simulation"]["report"] = phys
+    master_record["simulation"]["log_sample"] = flight_log
+    
     if 'wheelbase' not in cad_data: 
+        # Heuristic fallback if vision failed
         cad_data['wheelbase'] = cad_data.get('prop_diameter_mm', 127) * 1.8
+        
+    master_record["fabrication"]["specs"] = cad_data
         
     assets = generate_assets("mission", cad_data)
     
@@ -116,11 +147,16 @@ async def run():
         if isinstance(v, str) and (not v or not os.path.exists(v)) and k != "assembly_scad":
             path = os.path.join(OUTPUT_DIR, f"mission_{k}.stl")
             assets[k] = create_placeholder_stl(path)
+            
+    master_record["fabrication"]["assets"] = assets
 
     # 6. Docs
     print("\n📝 Finalizing Documentation...")
     guide = await generate_assembly_instructions({"bill_of_materials": bom, "engineering_notes": specs.get("engineering_notes")})
     cost = generate_procurement_manifest(bom)
+    
+    master_record["documentation"]["assembly_guide"] = guide
+    master_record["documentation"]["procurement"] = cost
     
     # 7. Render
     with open(os.path.join(TEMPLATE_DIR, "dashboard.html"), "r") as f: html = f.read()
@@ -140,9 +176,11 @@ async def run():
     out_path = os.path.join(OUTPUT_DIR, "dashboard.html")
     with open(out_path, "w") as f: f.write(html)
     
-    # Save Record
-    with open(os.path.join(OUTPUT_DIR, "master_record.json"), "w") as f:
-        json.dump({"plan": plan, "bom": bom, "physics": phys}, f, indent=2)
+    # Save FULL Record
+    json_path = os.path.join(OUTPUT_DIR, "master_record.json")
+    print(f"\n💾 SAVING SOURCE OF TRUTH: {json_path}")
+    with open(json_path, "w") as f:
+        json.dump(master_record, f, indent=2)
 
     print(f"\n🚀 Done. Dashboard: {out_path}")
     webbrowser.open(f"file://{out_path}")
