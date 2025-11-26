@@ -1,87 +1,72 @@
-Feasibility Matrix: The Roadmap from 7/10 to 9.5/10
-Feature	Feasibility (Now)	Required Tech / Tools	Primary Challenge	Verdict
-1. Constraint Solving	10/10	python-constraint library	Data Extraction: Reliably getting the numbers (e.g., mounting_mm) from the BOM to feed into the solver. The solver itself is simple.	Yes, Immediately. This is a pure software task and a huge reliability win.
-2. Curated Database	10/10	SQLite, PostgreSQL	Human Labor: Manually populating and verifying 500+ components is a massive, expert-driven data entry task.	Yes, Immediately. The bottleneck is human effort, not technology.
-3. Empirical Correction	9/10	numpy, scikit-learn	Data Pipeline: Building the infrastructure to collect, clean, and process user-submitted flight logs. The math is straightforward.	Yes. The basic correction factors are easy. The full RL loop is a larger data engineering project.
-4. Firmware Matrix	8/10	Python Dictionaries, JSON Schema	Knowledge Codification: An expert must manually translate "tribal knowledge" into a machine-readable format. It's brittle and needs constant maintenance.	Yes, but it requires expert input. It's a manual knowledge-base creation task.
-5. Thermal/Vibration	7/10	numpy, scipy	Model Derivation: The code is easy, but the simplified physics formulas must be derived from academic papers or real-world experiments. You can't just guess them.	Yes, if you have the physics expertise. The challenge is in the physics modeling, not the programming.
-6. Human Escalation	10/10	Slack API, Zendesk API, Email Lib	Operational: Who is the expert on the other end? How is their feedback ingested back into the system? It's a workflow design problem.	Yes, trivially. The technology for creating and routing tickets is very mature.
-7. Regulatory/Safety	9/10	Python Dictionaries, JSON	Legal Maintenance: Drone laws change constantly and vary by region. Keeping the rule set up-to-date is a non-trivial legal/administrative task.	Yes. A basic version for a single region (e.g., the >250g FAA rule) is very easy to implement.
-8. Continuous Learning	7/10	Database, ML Framework, Job Scheduler	MLOps Infrastructure: This is a full MLOps project requiring a data pipeline, retraining scripts, and model deployment strategies.	Yes, but it's a significant project. The tools all exist, but this is a complex system to build.
-
-
-
-
-
-
-
 # OpenForge: Autonomous Supply Chain & Engineering Platform
 
 <div align="center">
 
 [![Python Version](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-red.svg)](https://www.gnu.org/licenses/agpl-3.0)
-[![Status](https://img.shields.io/badge/Status-Prototype-orange.svg)]()
+[![Status](https://img.shields.io/badge/Status-Industrial_Prototype-orange.svg)]()
 
 **The "Iron Man" Protocol for Hardware Engineering.**  
-An AI system that builds its own inventory, verifies components with computer vision, and designs mission-critical drones.
+An AI system that builds its own inventory, manufactures virtual products, and simulates mission-critical robotics.
 
 </div>
 
 ---
 
-**OpenForge is not a chatbot.** It is an automated engineering firm.
+**OpenForge is not a chatbot.** It is a Hardware Compiler.
 
-Most AI engineering tools are "Reactive"—they wait for a user to ask for a part, then try to scrape the web, often hallucinating specifications. OpenForge is **"Proactive."** It utilizes a background "Night Shift" agent that relentlessly scours the global supply chain, verifying components using Computer Vision, and building a local "Arsenal" of trusted parts.
+Traditional AI tools operate on text. OpenForge operates on **Physics and Supply Chains**. It utilizes a multi-agent architecture to scour the global market for components, verify them using Computer Vision, procedurally generate valid engineering assemblies, and simulate them in a browser-based physics engine.
 
-When you ask OpenForge to build a drone, it doesn't guess. It consults its verified inventory, simulates the physics, checks for CAD collisions, and offers a strategic choice: **Buy** an off-the-shelf solution, or **Build** a custom rig.
+It transforms **Natural Language Intent** (e.g., "I need to inspect fences autonomously") into **Verified Engineering Reality** (BOMs, Blueprints, and Flight Simulations).
 
 ## 🚀 Key Capabilities
 
-### 1. The "Arsenal" (Inventory Engine)
-*   **The Night Shift:** A background agent (`seed_arsenal.py`) runs autonomously to hunt for components. It roleplays different personas (Rancher, Racer, Cinema) to find diverse parts.
-*   **Vision Verification:** The system refuses to trust text descriptions. It uses **Gemini Vision** to read technical datasheets and diagrams. It only adds a part to the database if it identifies critical specs (mounting patterns, dimensions, voltage) with **>85% confidence**.
-*   **Persistent Memory:** Verified parts are stored in a local JSON database, allowing for instant, zero-hallucination lookups during design.
+### 1. The Arsenal (Automated Supply Chain)
+*   **The Night Shift:** A background agent (`seed_arsenal.py`) autonomously hunts for components. It verifies specs using **Vision AI** (reading PCB silk screens and technical drawings) to ensure data integrity.
+*   **Robotics Aware:** Unlike simple scrapers, it understands the "Brain" of the drone. It identifies and tags components for **AI Compute** (Jetson/Pi), **Sensors** (Lidar/Depth), and **Firmware Compatibility** (ArduPilot/Betaflight).
+*   **Visual DNA:** Extracts material properties (Carbon Fiber vs Aluminum, Matte vs Glossy) from product images to power the photorealistic simulator.
 
-### 2. The "Consultant" (Buy vs. Build)
-*   **Market Scout Agent:** When presented with a mission, OpenForge doesn't just try to build a robot. It also scans the market for Commercial Off-The-Shelf (COTS) solutions (e.g., DJI Enterprise, Autel).
-*   **Strategic Output:** The final dashboard presents a comparison: The estimated cost and effort to build a custom verified design vs. the price and specs of an immediate purchase.
+### 2. The Fabricator (Procedural Manufacturing)
+*   **The SKU Generator:** A combinatorial engine (`fabricate_catalog.py`) that takes the verified parts list and procedurally attempts to build every possible valid drone configuration.
+*   **The Filter:** It runs a **Master Builder** check (geometry fitment) and a **Physics Simulation** (flight dynamics) on every combination. If a drone doesn't fly or fit, it is discarded.
+*   **The Catalog:** The result is a massive JSON database of thousands of pre-validated, flight-ready drone designs, complete with auto-generated marketing descriptions.
 
-### 3. The "Architect" (Design Core)
-*   **Mission-Driven Design:** Translates vague requests (e.g., "Find lost calves in brush") into engineering constraints (e.g., "High-torque motors, propeller guards, thermal camera").
-*   **Supply Chain Logic:** Prioritizes parts from the local verified Arsenal. Only triggers a "Deep Web Search" if the local inventory cannot satisfy the mission requirements.
+### 3. The Architect (Mission Engineering)
+*   **Intent Analysis:** Translates vague user requests into precise engineering constraints (e.g., "Find cows" -> "Requires Thermal Camera + Edge AI Compute").
+*   **Buy vs. Build:** The system analyzes the market to offer a strategic choice: **Buy** an off-the-shelf enterprise drone (found by the Scout Agent) or **Build** a custom rig (designed by the Engineer Agent).
 
-### 4. Validation & Digital Twin
-*   **Physics Simulator:** Calculates flight time, thrust-to-weight ratio, and disk loading based on the *actual* weights of verified parts.
-*   **Generative CAD:** Procedurally generates 3D models (OpenSCAD) to check for geometric collisions (e.g., "Does the battery fit inside this specific frame?").
-*   **Web Dashboard:** Renders a 3D interactive model, assembly guide, and flight log simulation in the browser.
+### 4. The Virtual Prototyping Lab (Simulation)
+*   **Browser-Based Game Engine:** A fully interactive 3D simulator running on **Three.js** (Graphics) and **Cannon.js** (Physics).
+*   **Real Physics:** Flight characteristics (inertia, drag, thrust) are derived from the actual mass and motor curves of the sourced parts.
+*   **Context-Aware Environments:** If you are a rancher, the sim loads a forest environment. If you are a filmmaker, it loads a city.
 
 ## 🛠️ Architecture
 
-OpenForge separates the **Data Acquisition** (Seeding) from the **Engineering** (Building).
+OpenForge separates Data Acquisition, Product Generation, and User Interaction into distinct layers.
 
 <div align="center">
 
 ```mermaid
 graph TD
-    subgraph "The Night Shift (Background)"
-        A[Seed Agent] -->|Roleplays Mission| B(Rancher/Engineer Persona);
-        B -->|Generates Queries| C(Deep Recon);
-        C -->|Scrape & Vision Check| D{Confidence > 85%?};
-        D -- Yes --> E[(Arsenal Database)];
-        D -- No --> F[Discard];
+    subgraph Layer 1: The Supply Chain
+        A[Seed Agent] -->|Vision Verification| B[(Arsenal JSON)];
     end
 
-    subgraph "The Day Shift (User Facing)"
-        User -->|Mission Prompt| Architect;
-        Architect -->|Query| Arsenal{Check Arsenal};
-        Arsenal -- Found --> BOM[Draft BOM];
-        Arsenal -- Missing --> LiveSearch[Live Search Fallback];
-        LiveSearch --> BOM;
-        BOM --> Physics[Physics Sim];
-        Physics --> CAD[CAD Collision Check];
-        CAD --> Dashboard[Digital Twin];
+    subgraph Layer 2: The Factory
+        B --> C[Fabricator Script];
+        C -->|Permutation & Logic Check| D[Physics Engine];
+        D -->|Valid Configs| E[(Catalog JSON)];
     end
+
+    subgraph Layer 3: The User Interface
+        User -->|Mission Prompt| Architect;
+        Architect -->|Query| E;
+        Architect -->|Query| B;
+        Architect -->|Select Best Fit| F[Digital Twin];
+    end
+
+    F --> G[3D Physics Sim];
+    F --> H[Assembly Guide & BOM];
 ```
 </div>
 
@@ -89,12 +74,12 @@ graph TD
 
 #### Prerequisites
 *   **Python 3.10+**
-*   **OpenSCAD:** Required for 3D model generation.
+*   **OpenSCAD:** Required for manufacturing file generation.
     *   Linux: `sudo apt install openscad`
     *   Mac: `brew install --cask openscad`
     *   Windows: [Download Installer](https://openscad.org/)
-*   **Google Gemini API Key** (for Vision/LLM)
-*   **Google Custom Search API Key** (for Web Recon)
+*   **Google Gemini API Key** (Visual Reasoning)
+*   **Google Custom Search API Key** (Web Recon)
 
 #### Setup
 1.  **Clone the repository:**
@@ -110,56 +95,45 @@ graph TD
     ```
 
 3.  **Configuration:**
-    Create a `app/config.py` or set environment variables:
-    ```python
-    GOOGLE_API_KEY = "your_key"
-    GOOGLE_SEARCH_ENGINE_ID = "your_cse_id"
-    ```
+    Set your API keys in `app/config.py` or environment variables.
 
 ## 🖥️ Usage
 
-### Phase 1: Seed the Arsenal (The "Night Shift")
-Before you build, let the AI go hunting. This script fills your local database with high-quality parts.
+OpenForge is designed to run in three stages:
+
+### 1. Seed the Arsenal (Data Acquisition)
+Populate your local database with verified parts.
 ```sh
 python tools/seed_arsenal.py
 ```
-*   *What happens:* The agents will act as a "Rancher," identifying needs for a fleet, finding parts, verifying them via Computer Vision, and saving them to `data/drone_arsenal.json`.
 
-### Phase 2: Run the Architect (The "Day Shift")
-Now, use those parts to design a specific solution.
+### 2. Fabricate Products (Data Processing)
+Turn those parts into thousands of valid, pre-calculated drone configurations.
+```sh
+python tools/fabricate_catalog.py
+```
+
+### 3. Run the Architect (User Interface)
+Launch the mission planner and simulator.
 ```sh
 python main.py
 ```
-*   *What happens:* Enter your mission. The system will consult the `drone_arsenal.json`, simulate the physics, and generate a `dashboard.html` with your custom build and COTS alternatives.
 
-## 📂 Project Structure
+## 🗺️ Roadmap & Feasibility
 
-```
-OpenForge/
-├── app/
-│   ├── services/
-│   │   ├── fusion_service.py   # The "Eyes": Scrapes & runs Vision AI
-│   │   ├── cad_service.py      # The "Hands": Generates OpenSCAD
-│   │   ├── physics_service.py  # The "Brain": Calculates flight math
-│   │   └── ...
-│   └── prompts.py              # The "Personality": Rancher, Engineer, Scout
-├── data/
-│   └── drone_arsenal.json      # The Verified Part Database
-├── tools/
-│   └── seed_arsenal.py         # The Background Seeder Script
-├── templates/
-│   └── dashboard.html          # Digital Twin UI
-└── main.py                     # User Entry Point
-```
+We are moving from a prototype to an enterprise standard. Here is the current status:
 
-## 🤝 Contributing
-
-We are building the "Linux of Hardware."
-*   **Submit Arsenals:** Found 100 great racing parts? Submit your `drone_arsenal.json`.
-*   **New Personas:** Write a prompt for a "Cinematographer" or "Search & Rescue" agent in `prompts.py`.
-*   **Scrapers:** Help us parse complex sites like Mouser or DigiKey.
+| Feature | Status | Description |
+| :--- | :--- | :--- |
+| **Constraint Solving** | 🟢 **Done** | Uses logic to ensure motors fit mounts and props fit frames. |
+| **Curated Database** | 🟢 **Done** | `seed_arsenal.py` builds a verified local inventory via Vision AI. |
+| **Physics Simulation** | 🟢 **Done** | `Cannon.js` integration maps real mass/thrust to simulation. |
+| **Interconnect Logic** | 🟡 **Beta** | Heuristic analysis of cable lengths and connector types (XT30/60). |
+| **Firmware Matrix** | 🟡 **Beta** | Infers ArduPilot/Betaflight compatibility via MCU type and scraping. |
+| **Empirical Correction** | 🔴 **Planned** | RL loop to correct simulation parameters based on real flight logs. |
+| **Regulatory/Safety** | 🔴 **Planned** | Auto-check compliance (e.g., <250g rule) based on region. |
 
 ## 📄 License
 
-[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-red.svg)](https://www.gnu.org/licenses/agpl-3.0)
+This project is licensed under the AGPL v3.
 ```
