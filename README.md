@@ -1,13 +1,12 @@
-need to improve fusion service to grab all the specs for the parts as will as improve the prompts to be more specific in the parts it asks for.  there is also a lot of misclassification of parts that are add ons rather than fundemental to a build.  bacially we need to redo how the parts information is pulled so that we have the most amount of information possible.  we also need to loop the fabricate back so that when it finds a part is missing something a program is activated to either reclassify the part find needed information or add information or remove the part from the list.  what we have now is a good example of an ai that can think about needs search for them find info on them assemble and interconnect then test to see what works.  from a process standpoint it is good.  from a detailed standpoint of putting something togther we are not there yet.  this may be that we have pushed to boundries of open information and ai processing or we just have not cracked the correct prompt structure to gather enough info to construct an approved one.  either way it is a few more steps forward.
+Drone_3 works end to end however the physics video game simulator needs work as drones are difficult to control and graphics could be less blocky.  However the serires or programs will render 2 drone constuctions which is pretty good since we start from scratch with some basic user requriments and end up with enough parts with good specs through the fusion process to create unique drones.  
 
-happy thanksgiving!! 
-# OpenForge: Autonomous Supply Chain & Engineering Platform
+# OpenForge: Neuro-Symbolic Manufacturing Engine
 
 <div align="center">
 
 [![Python Version](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-red.svg)](https://www.gnu.org/licenses/agpl-3.0)
-[![Status](https://img.shields.io/badge/Status-Industrial_Prototype-orange.svg)]()
+[![Status](https://img.shields.io/badge/Status-V2_Architecture-green.svg)]()
 
 **The "Iron Man" Protocol for Hardware Engineering.**  
 An AI system that builds its own inventory, manufactures virtual products, and simulates mission-critical robotics.
@@ -22,26 +21,36 @@ Traditional AI tools operate on text. OpenForge operates on **Physics and Supply
 
 It transforms **Natural Language Intent** (e.g., "I need to inspect fences autonomously") into **Verified Engineering Reality** (BOMs, Blueprints, and Flight Simulations).
 
+---
+
+## 🚧 State of the Union (Thanksgiving Update)
+
+We have moved beyond simple RAG (Retrieval-Augmented Generation) into **Agentic Reasoning**.
+
+*   **The Good:** The system can now "think" about requirements, search for specific hardware classes, autonomously browse websites to find hidden specs (via the Refinery Agent), assemble components in memory, and physically test them in a simulator. From a process standpoint, the architecture is sound.
+*   **The Challenge:** We are pushing the boundaries of unstructured data extraction. While our "Active Recon" agents are impressive, they still struggle with the "Dirty Data" problem of the open internet (misclassified parts, vague product pages).
+*   **Next Steps:** We are working on closing the loop—enabling the Fabricator to "reject and repair" data in real-time. If a part is missing a weight spec during assembly, the system should trigger a dedicated scraper to find just that one number.
+
+---
+
 ## 🚀 Key Capabilities
 
-### 1. The Arsenal (Automated Supply Chain)
-*   **The Night Shift:** A background agent (`seed_arsenal.py`) autonomously hunts for components. It verifies specs using **Vision AI** (reading PCB silk screens and technical drawings) to ensure data integrity.
-*   **Robotics Aware:** Unlike simple scrapers, it understands the "Brain" of the drone. It identifies and tags components for **AI Compute** (Jetson/Pi), **Sensors** (Lidar/Depth), and **Firmware Compatibility** (ArduPilot/Betaflight).
-*   **Visual DNA:** Extracts material properties (Carbon Fiber vs Aluminum, Matte vs Glossy) from product images to power the photorealistic simulator.
+### 1. The Arsenal (Active Supply Chain)
+*   **The Constraint Chain:** We don't just search for "motors." An **Architect Agent** first translates user intent ("Brush Buster") into physics constraints ("Stator Volume > 2306", "Arm Thickness > 5mm").
+*   **The Refinery:** A high-agency background worker (`refine_arsenal.py`) that audits the database. If a spec is missing, it spins up a headless browser, **clicks "Specifications" tabs**, reads the DOM, and updates the record.
+*   **Visual Forensics:** Uses Vision AI to read PCB silkscreens and technical drawings to verify data that text scrapers miss.
 
-### 2. The Fabricator (Procedural Manufacturing)
-*   **The SKU Generator:** A combinatorial engine (`fabricate_catalog.py`) that takes the verified parts list and procedurally attempts to build every possible valid drone configuration.
-*   **The Filter:** It runs a **Master Builder** check (geometry fitment) and a **Physics Simulation** (flight dynamics) on every combination. If a drone doesn't fly or fit, it is discarded.
-*   **The Catalog:** The result is a massive JSON database of thousands of pre-validated, flight-ready drone designs, complete with auto-generated marketing descriptions.
+### 2. The Fabricator (Logic-Gated Manufacturing)
+*   **The Class Filter:** Instead of random combinations, the engine intelligently buckets parts (e.g., "7-inch Long Range", "Heavy Lift"). It only attempts to build drones with components in the same class.
+*   **The Logic Gate:** A deterministic `CompatibilityService` that enforces hard physics rules *before* AI generation:
+    *   **Voltage:** Checks `Battery Cells` vs `Motor KV` (Prevents fires).
+    *   **Protocol:** Checks `UART Count` vs `Peripherals` (Prevents I/O bottlenecks).
+    *   **Geometry:** Checks `Prop Size` vs `Frame Clearance` (Prevents collisions).
 
-### 3. The Architect (Mission Engineering)
-*   **Intent Analysis:** Translates vague user requests into precise engineering constraints (e.g., "Find cows" -> "Requires Thermal Camera + Edge AI Compute").
-*   **Buy vs. Build:** The system analyzes the market to offer a strategic choice: **Buy** an off-the-shelf enterprise drone (found by the Scout Agent) or **Build** a custom rig (designed by the Engineer Agent).
-
-### 4. The Virtual Prototyping Lab (Simulation)
-*   **Browser-Based Game Engine:** A fully interactive 3D simulator running on **Three.js** (Graphics) and **Cannon.js** (Physics).
+### 3. The Virtual Prototyping Lab (Simulation)
+*   **Browser-Based Game Engine:** A fully interactive 3D simulator running on **Three.js** and **Cannon.js**.
 *   **Real Physics:** Flight characteristics (inertia, drag, thrust) are derived from the actual mass and motor curves of the sourced parts.
-*   **Context-Aware Environments:** If you are a rancher, the sim loads a forest environment. If you are a filmmaker, it loads a city.
+*   **Procedural Environment:** The sim generates context-aware environments (Trees, Cows, Buildings) to test the drone's intended use case.
 
 ## 🛠️ Architecture
 
@@ -51,25 +60,26 @@ OpenForge separates Data Acquisition, Product Generation, and User Interaction i
 
 ```mermaid
 graph TD
-    subgraph Layer 1: The Supply Chain
-        A[Seed Agent] -->|Vision Verification| B[(Arsenal JSON)];
+    subgraph Layer 1: The Active Supply Chain
+        A[Seed Agent] -->|Constraint Search| B[Raw Inventory];
+        B -->|Audit| C[Refinery Agent];
+        C -->|Click & Scrape| D[(Verified Arsenal)];
     end
 
     subgraph Layer 2: The Factory
-        B --> C[Fabricator Script];
-        C -->|Permutation & Logic Check| D[Physics Engine];
-        D -->|Valid Configs| E[(Catalog JSON)];
+        D --> E[Fabricator Script];
+        E -->|Deterministic Logic Gate| F{Compatibility Check};
+        F -->|Pass| G[AI Assembler];
+        F -->|Fail| H[Discard];
+        G -->|Generate| I[(Catalog JSON)];
     end
 
-    subgraph Layer 3: The User Interface
-        User -->|Mission Prompt| Architect;
-        Architect -->|Query| E;
-        Architect -->|Query| B;
-        Architect -->|Select Best Fit| F[Digital Twin];
+    subgraph Layer 3: The Interface
+        User -->|Natural Language| Architect;
+        Architect -->|Select Best Build| J[Digital Twin];
+        J --> K[Flight Simulator];
+        J --> L[Assembly Guide];
     end
-
-    F --> G[3D Physics Sim];
-    F --> H[Assembly Guide & BOM];
 ```
 </div>
 
@@ -77,12 +87,9 @@ graph TD
 
 #### Prerequisites
 *   **Python 3.10+**
-*   **OpenSCAD:** Required for manufacturing file generation.
-    *   Linux: `sudo apt install openscad`
-    *   Mac: `brew install --cask openscad`
-    *   Windows: [Download Installer](https://openscad.org/)
-*   **Google Gemini API Key** (Visual Reasoning)
-*   **Google Custom Search API Key** (Web Recon)
+*   **Playwright:** Required for the active refinery agent.
+*   **Google Gemini API Key:** (Visual Reasoning & Logic)
+*   **Google Custom Search API Key:** (Web Recon)
 
 #### Setup
 1.  **Clone the repository:**
@@ -102,39 +109,41 @@ graph TD
 
 ## 🖥️ Usage
 
-OpenForge is designed to run in three stages:
-
-### 1. Seed the Arsenal (Data Acquisition)
-Populate your local database with verified parts.
+### 1. Seed & Refine (The Data Loop)
+Populate your local database and let the AI "fix" missing data.
 ```sh
+# Step 1: Broad search based on constraints
 python tools/seed_arsenal.py
+
+# Step 2: Active investigation (Clicks tabs, reads screenshots)
+python tools/refine_arsenal.py
+
+# Step 3: Grade your data quality
+python tools/inspect_data_quality.py
 ```
 
-### 2. Fabricate Products (Data Processing)
-Turn those parts into thousands of valid, pre-calculated drone configurations.
+### 2. Design the Fleet (The Logic Loop)
+Ask the AI to select optimal combinations from your refined inventory.
 ```sh
-python tools/fabricate_catalog.py
+python tools/design_fleet.py
 ```
 
-### 3. Run the Architect (User Interface)
-Launch the mission planner and simulator.
+### 3. Fly (The Simulation)
+Launch the physics engine.
 ```sh
-python main.py
+python tools/fly_drone.py
 ```
 
-## 🗺️ Roadmap & Feasibility
-
-We are moving from a prototype to an enterprise standard. Here is the current status:
+## 🗺️ Roadmap
 
 | Feature | Status | Description |
 | :--- | :--- | :--- |
-| **Constraint Solving** | 🟢 **Done** | Uses logic to ensure motors fit mounts and props fit frames. |
-| **Curated Database** | 🟢 **Done** | `seed_arsenal.py` builds a verified local inventory via Vision AI. |
-| **Physics Simulation** | 🟢 **Done** | `Cannon.js` integration maps real mass/thrust to simulation. |
-| **Interconnect Logic** | 🟡 **Beta** | Heuristic analysis of cable lengths and connector types (XT30/60). |
-| **Firmware Matrix** | 🟡 **Beta** | Infers ArduPilot/Betaflight compatibility via MCU type and scraping. |
-| **Empirical Correction** | 🔴 **Planned** | RL loop to correct simulation parameters based on real flight logs. |
-| **Regulatory/Safety** | 🔴 **Planned** | Auto-check compliance (e.g., <250g rule) based on region. |
+| **Constraint Solving** | 🟢 **Done** | Translates "intent" to "physics" before sourcing. |
+| **Active Refinery** | 🟢 **Done** | Agentic browsing to click UI elements and find hidden specs. |
+| **Physics Logic Gate** | 🟢 **Done** | Deterministic code prevents AI from building unflyable drones. |
+| **3D Simulator** | 🟢 **Done** | Procedural "Game Engine" based on real component specs. |
+| **Feedback Loop** | 🟡 **In Progress** | If a build fails, auto-trigger the Sourcer to find the missing part. |
+| **Cost Optimization** | 🔴 **Planned** | Genetic algorithm to find the cheapest valid configuration. |
 
 ## 📄 License
 
