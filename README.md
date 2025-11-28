@@ -14,7 +14,8 @@ An AI system that builds its own inventory, creates virtual products, and simula
 
 ---
 
-**OpenForge is not a chatbot.** It is a Hardware Compiler.
+**OpenForge is a research prototype exploring AI-driven design automation. It demonstrates how constraint propagation, multi-modal verification, and
+deterministic validation can work together to automate hardware engineering tasks.** 
 
 Traditional AI tools operate on text. OpenForge operates on **Physics and Supply Chains**. It utilizes a multi-agent architecture to scour the global market for components, verify them using Computer Vision, procedurally generate valid engineering assemblies, and simulate them in a browser-based physics engine.
 
