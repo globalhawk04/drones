@@ -1,6 +1,6 @@
 Drone_4 first princple prompts update to gather more detailed information for issac simmulation.  Catelog Json has improved.  Instead of epic video game simualtion i am going with nvidia issac to simulate.  Upgrading simulation will be the main focus for the next 72 hours.  Once I have the full pipeline completed to a point in which i am satified the simulation is as best as i can get i will shift from drones to something else like quad or robot arms using hugging face tut: https://huggingface.co/docs/lerobot/en/so101
 
-This is a portfolio piece.  I am actively looking for high-level consulting gigs (Fractional CTO, Principal Engineer) or a Team Lead roles.
+This is a portfolio piece.  I am actively looking for high-level consulting gigs (Fractional CTO, Principal Engineer) or Team Lead roles.
 
 seed.py
 seed_ecosystem.py
