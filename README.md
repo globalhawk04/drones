@@ -1,15 +1,18 @@
-System now works from seed to simulation for drones! I cheated a little bit in the make_fleet.py to rely less on LLM to create but I had to remind myself that this was a test of Gem 3.0 reasoning and not making things absolutely perfect to avoid going down a needless rabithole.  Now that I have the pipeline completed to a point in which i am satified the simulation is as best as i can get i will shift from drones to something else like quad or robot arms using hugging face tut: https://huggingface.co/docs/lerobot/en/so101
+System now works from seed to simulation for drones! I cheated a little bit in the make_fleet.py to rely less on LLM to create the fleet but I had to remind myself that this was a test of Gem 3.0 reasoning and not making things absolutely perfect to avoid going down a needless rabithole.  Now that I have the pipeline completed to a point in which i am satified the simulation is as best as i can get i will shift from drones to something else like quad or robot arms using hugging face tut: https://huggingface.co/docs/lerobot/en/so101
 
 This is a portfolio piece.  I am actively looking for high-level consulting gigs (Fractional CTO, Principal Engineer) or Team Lead roles.
 
-seed.py
-seed_ecosystem.py
-refine_arsenal.py
-design_fleet.py
-
-seed.py Understanding intent, generating model, creating search, and looking for parts:
+seed.py: Understanding intent, generating model, creating search, and looking for parts:
 <img width="805" height="467" alt="image" src="https://github.com/user-attachments/assets/f5380ad2-d31f-4dcd-a22d-216c33fe6d55" />
 
+seed_ecosystem.py: Analyzing Dependancies, creating search terms, and finding results:
+<img width="931" height="386" alt="image" src="https://github.com/user-attachments/assets/32fb1652-98b0-4ce4-b38c-56fe8d39d00f" />
+
+refine_arsenal.py: Improving Data Integrity:
+<img width="941" height="116" alt="image" src="https://github.com/user-attachments/assets/a574d46a-f4c2-4172-81ab-f49cf9b38bf9" />
+
+make_fleet.py: Generating drones from data that has been collected
+<img width="941" height="226" alt="image" src="https://github.com/user-attachments/assets/377f7278-2a6b-401f-95b9-c1109f226fdf" />
 
 Drone Simulated in Isaac Sim Python 5.0.0!!!
 <img width="743" height="884" alt="image" src="https://github.com/user-attachments/assets/cd7709cb-4544-4ee1-866d-1064b5a7c14d" />
